@@ -3,7 +3,7 @@ This is my testing image for scim2/djago/apache/sssd integration.
 
 This container runs apache httpd and sssd.
 
-Django3 ans scim2 module are installed empty django project is created
+Django3 and scim2 module are installed empty django project is created
 
 ## Playing with container
 There is a Makefile to make it a bit easier.
