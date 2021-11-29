@@ -1,26 +1,30 @@
-FROM centos:8
+FROM centos:8 as BASE
 
-# enable EPEL repo and install required packages
-RUN dnf -y install epel-release && \
-    dnf -y install supervisor sssd httpd python3-django3 python3-mod_wsgi && \
-    dnf clean all
+# install required packages, enable services
+RUN dnf -y install sssd httpd python3 python3-mod_wsgi && \
+    dnf clean all && \
+    systemctl enable httpd && \
+    systemctl enable sssd && \
+    mkdir -p /var/www/django
 
-COPY sssd.conf /etc/sssd/
-COPY sssd.ini httpd.ini /etc/supervisord.d/
-COPY supervisord.conf /etc/
+COPY --chown=0:0 --chmod=600 sssd.conf /etc/sssd/
 COPY app.conf /etc/httpd/conf.d/
-COPY entrypoint /usr/bin/
 
-# prepare sssd
-RUN chmod 600 /etc/sssd/sssd.conf && \
-    chown root:root /etc/sssd/sssd.conf
+FROM BASE as TAR
+#---------------
+
+COPY requirements.txt /var/www/django/
 
 # prepare django, venv with scim2
-RUN mkdir -p /var/www/django && \
-    cd /var/www/django && \
+RUN cd /var/www/django && \
     python3 -m venv venv && \
     . ./venv/bin/activate && \
-    pip install django-scim2 && \
+    pip install -r requirements.txt && \
     django-admin startproject app
 
-ENTRYPOINT [ "/usr/bin/entrypoint" ]
+FROM BASE as FINAL
+#-----------------
+
+ADD scim2playground.tgz /var/www/
+
+ENTRYPOINT [ "/sbin/init" ]
