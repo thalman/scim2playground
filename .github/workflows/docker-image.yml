@@ -1,0 +1,30 @@
+name: Docker scim2playground build
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build the base Docker image
+      run: |
+        make base
+
+    - name: Create app tar
+      run: |
+        make tar
+
+    - name: Create final image
+      run: |
+        make build
+
+    - name: Push image to dockerhub
+      run: |
+        podman login --username ${{ secrets.DOCKERHUBUSER }} --password ${{ secrets.DOCKERHUBPASSWORD }} docker.io && \
+        podman tag localhost/scim2playground:latest docker.io/thalman/scim2playground:latest && \
+        podman push docker.io/thalman/scim2playground:latest
