@@ -22,7 +22,7 @@ jobs:
         make base
 
     - name: Create app tar
-      timeout-minutes: 6
+      timeout-minutes: 10
       run: |
         make tar
 
