@@ -8,6 +8,12 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        baseimage: ['centos:8', 'tgagor/centos:stream9']
+
+    env:
+      BASEIMAGE: ${{ matrix.baseimage }}
 
     steps:
     - uses: actions/checkout@v2
@@ -25,6 +31,23 @@ jobs:
 
     - name: Push image to dockerhub
       run: |
-        podman login --username ${{ secrets.DOCKERHUBUSER }} --password ${{ secrets.DOCKERHUBPASSWORD }} docker.io && \
-        podman tag localhost/scim2playground:latest docker.io/thalman/scim2playground:latest && \
-        podman push docker.io/thalman/scim2playground:latest
+        set -e
+        
+        LATEST=0
+        case "${{ matrix.baseimage }}" in
+            "centos:8")
+                TAG="docker.io/thalman/scim2playground:8"
+                ;;
+            "tgagor/centos:stream9")
+                TAG="docker.io/thalman/scim2playground:9"
+                LATEST=1
+                ;;
+        esac
+        
+        podman login --username ${{ secrets.DOCKERHUBUSER }} --password ${{ secrets.DOCKERHUBPASSWORD }} docker.io
+        podman tag "localhost/scim2playground:latest" "$TAG"
+        podman push "$TAG"
+        if [ "$LATEST" = "1" ] ; then
+            podman tag "localhost/scim2playground:latest" "docker.io/thalman/scim2playground:latest"
+            podman push "docker.io/thalman/scim2playground:latest"
+        fi

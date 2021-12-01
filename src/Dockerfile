@@ -1,5 +1,9 @@
-# FROM centos:8 as BASE
-FROM tgagor/centos:stream9 as BASE
+ARG from=centos:8
+# tested base images are
+# * centos:8
+# * tgagor/centos:stream9 
+
+FROM ${from} as BASE
 
 # install required packages, enable services
 RUN dnf -y install sssd httpd python3 python3-mod_wsgi && \
