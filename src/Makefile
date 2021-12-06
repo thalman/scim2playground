@@ -5,11 +5,11 @@ all:
 	@echo "use make build|fun|attach|run|prep|tar|base"
 
 base:
-	if $(PODMAN) rmi "scim2playground:base"; then $(PODMAN) rmi "scim2playground:base"; else true; fi
+	if $(PODMAN) image exists "scim2playground:base"; then $(PODMAN) rmi "scim2playground:base"; else true; fi
 	$(PODMAN) build -f Dockerfile --build-arg from=$(BASEIMAGE) --target BASE -t scim2playground:base .
 
 tar:
-	if $(PODMAN) rmi "scim2playground:tar"; then $(PODMAN) rmi "scim2playground:tar"; else true; fi
+	if $(PODMAN) image exists "scim2playground:tar"; then $(PODMAN) rmi "scim2playground:tar"; else true; fi
 	$(PODMAN) build -f Dockerfile --build-arg from=$(BASEIMAGE) --target TAR -t scim2playground:tar .
 	$(PODMAN) run --rm scim2playground:tar tar -C /var/www -cf - django/app django/venv | gzip > scim2playground.tgz
 
